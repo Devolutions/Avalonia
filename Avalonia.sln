@@ -1,4 +1,6 @@
 ﻿Microsoft Visual Studio Solution File, Format Version 12.00
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
@@ -297,6 +299,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Avalonia.Headless.XUnit.PerAssembly.UnitTests", "tests\Avalonia.Headless.XUnit.PerAssembly.UnitTests\Avalonia.Headless.XUnit.PerAssembly.UnitTests.csproj", "{342D2657-2F84-493C-B74B-9D2CAE5D9DAB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Avalonia.Headless.XUnit.PerTest.UnitTests", "tests\Avalonia.Headless.XUnit.PerTest.UnitTests\Avalonia.Headless.XUnit.PerTest.UnitTests.csproj", "{26918642-829D-4FA2-B60A-BE8D83F4E063}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ControlCatalog.MacCatalyst", "samples\ControlCatalog.iOS\ControlCatalog.MacCatalyst.csproj", "{DE3C28DD-B602-4750-831D-345102A54CA0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ControlCatalog.tvOS", "samples\ControlCatalog.iOS\ControlCatalog.tvOS.csproj", "{14342787-B4EF-4076-8C91-BA6C523DE8DF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -694,6 +699,14 @@ Global
 		{26918642-829D-4FA2-B60A-BE8D83F4E063}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{26918642-829D-4FA2-B60A-BE8D83F4E063}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{26918642-829D-4FA2-B60A-BE8D83F4E063}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE3C28DD-B602-4750-831D-345102A54CA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE3C28DD-B602-4750-831D-345102A54CA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE3C28DD-B602-4750-831D-345102A54CA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE3C28DD-B602-4750-831D-345102A54CA0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{14342787-B4EF-4076-8C91-BA6C523DE8DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{14342787-B4EF-4076-8C91-BA6C523DE8DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{14342787-B4EF-4076-8C91-BA6C523DE8DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{14342787-B4EF-4076-8C91-BA6C523DE8DF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -782,6 +795,8 @@ Global
 		{09EC467F-0F25-4E6F-A836-2BAEC8F6AB0C} = {C5A00AC3-B34C-4564-9BDD-2DA473EF4D8B}
 		{342D2657-2F84-493C-B74B-9D2CAE5D9DAB} = {C5A00AC3-B34C-4564-9BDD-2DA473EF4D8B}
 		{26918642-829D-4FA2-B60A-BE8D83F4E063} = {C5A00AC3-B34C-4564-9BDD-2DA473EF4D8B}
+		{DE3C28DD-B602-4750-831D-345102A54CA0} = {9B9E3891-2366-4253-A952-D08BCEB71098}
+		{14342787-B4EF-4076-8C91-BA6C523DE8DF} = {9B9E3891-2366-4253-A952-D08BCEB71098}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {87366D66-1391-4D90-8999-95A620AD786A}
