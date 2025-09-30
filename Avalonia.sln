@@ -300,8 +300,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Avalonia.Headless.XUnit.Per
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Avalonia.Headless.XUnit.PerTest.UnitTests", "tests\Avalonia.Headless.XUnit.PerTest.UnitTests\Avalonia.Headless.XUnit.PerTest.UnitTests.csproj", "{26918642-829D-4FA2-B60A-BE8D83F4E063}"
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ControlCatalog.MacCatalyst", "samples\ControlCatalog.iOS\ControlCatalog.MacCatalyst.csproj", "{DE3C28DD-B602-4750-831D-345102A54CA0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ControlCatalog.MacCatalyst", "samples\ControlCatalog.MacCatalyst\ControlCatalog.MacCatalyst.csproj", "{DE3C28DD-B602-4750-831D-345102A54CA0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ControlCatalog.tvOS", "samples\ControlCatalog.iOS\ControlCatalog.tvOS.csproj", "{14342787-B4EF-4076-8C91-BA6C523DE8DF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ControlCatalog.tvOS", "samples\ControlCatalog.tvOS\ControlCatalog.tvOS.csproj", "{14342787-B4EF-4076-8C91-BA6C523DE8DF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
