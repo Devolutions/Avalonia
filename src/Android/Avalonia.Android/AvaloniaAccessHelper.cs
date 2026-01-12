@@ -170,7 +170,7 @@ namespace Avalonia.Android
             if (labeledBy is not null)
             {
                 GetOrCreateNodeInfoProvidersFromPeer(labeledBy, out int labeledById);
-                nodeInfo.SetLabeledBy(_view, labeledById);
+                nodeInfo.AddLabeledBy(_view, labeledById);
             }
 
             // UI debug metadata
@@ -194,7 +194,7 @@ namespace Avalonia.Android
                 _view.TopLevelImpl.PointToScreen(bounds.TopLeft),
                 _view.TopLevelImpl.PointToScreen(bounds.BottomRight)
                 );
-            nodeInfo.SetBoundsInParent(new(
+            nodeInfo.SetBoundsInScreen(new(
                 screenRect.X, screenRect.Y,
                 screenRect.Right, screenRect.Bottom
                 ));

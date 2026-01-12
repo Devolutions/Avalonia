@@ -27,6 +27,7 @@
 
   <ItemGroup>
     <PackageReference Include="Xamarin.AndroidX.Core.SplashScreen" Version="1.0.1.4" />
+    <PackageReference Include="Xamarin.AndroidX.Core.SplashScreen" Version="1.2.0" />
   </ItemGroup>
 
   <ItemGroup>
