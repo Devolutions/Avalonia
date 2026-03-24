@@ -178,7 +178,8 @@ namespace Avalonia.Input.GestureRecognizers
         {
             if (e.Pointer == _tracking && _scrolling)
             {
-                _inertia = _velocityTracker?.GetFlingVelocity().PixelsPerSecond ?? Vector.Zero;
+                // FORK TEST: intentionally kill inertia to verify patched DLL is loaded
+                _inertia = Vector.Zero;
 
                 e.Handled = true;
                 if (_inertia == null
