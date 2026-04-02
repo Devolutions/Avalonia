@@ -64,6 +64,13 @@ namespace Avalonia
         {
             AndroidRenderingMode.Egl, AndroidRenderingMode.Software
         };
+
+        /// <summary>
+        /// Use TextureView instead of SurfaceView for rendering.
+        /// TextureView supports view transforms, alpha, and normal view hierarchy compositing.
+        /// Default is false (SurfaceView).
+        /// </summary>
+        public bool UseTextureView { get; set; }
     }
 }
 

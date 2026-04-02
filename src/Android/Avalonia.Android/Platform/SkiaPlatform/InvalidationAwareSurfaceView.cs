@@ -6,23 +6,26 @@ using Android.Runtime;
 using Android.Util;
 using Android.Views;
 using Avalonia.Android.Platform.SkiaPlatform;
+using Avalonia.Logging;
 using Avalonia.Platform;
 
 namespace Avalonia.Android
 {
-    internal abstract class InvalidationAwareSurfaceView : SurfaceView, ISurfaceHolderCallback, INativePlatformHandleSurface
+    internal abstract class InvalidationAwareSurfaceView : SurfaceView, ISurfaceHolderCallback, IAvaloniaRenderView
     {
         bool _invalidateQueued;
         private bool _isDisposed;
         private bool _isSurfaceValid;
+        private IntPtr _nativeWindowHandle = IntPtr.Zero;
         readonly object _lock = new object();
         private readonly Handler _handler;
 
-        internal event EventHandler? SurfaceWindowCreated;
+        public event EventHandler? SurfaceWindowCreated;
+        public event EventHandler? SurfaceWindowDestroyed;
 
-        IntPtr IPlatformHandle.Handle => _isSurfaceValid && Holder?.Surface?.Handle is { } handle ?
-            AndroidFramebuffer.ANativeWindow_fromSurface(JNIEnv.Handle, handle) :
-            default;
+        View IAvaloniaRenderView.View => this;
+
+        IntPtr IPlatformHandle.Handle => _nativeWindowHandle;
 
         public InvalidationAwareSurfaceView(Context context) : base(context)
         {
@@ -60,11 +63,13 @@ namespace Avalonia.Android
         internal new void Dispose()
         {
             _isDisposed = true;
+            ReleaseNativeWindowHandle();
         }
 
         public void SurfaceChanged(ISurfaceHolder holder, Format format, int width, int height)
         {
             _isSurfaceValid = true;
+            CacheNativeWindowHandle();
             Log.Info("AVALONIA", "Surface Changed");
             DoDraw();
         }
@@ -72,6 +77,7 @@ namespace Avalonia.Android
         public void SurfaceCreated(ISurfaceHolder holder)
         {
             _isSurfaceValid = true;
+            CacheNativeWindowHandle();
             Log.Info("AVALONIA", "Surface Created");
             SurfaceWindowCreated?.Invoke(this, EventArgs.Empty);
             DoDraw();
@@ -80,8 +86,27 @@ namespace Avalonia.Android
         public void SurfaceDestroyed(ISurfaceHolder holder)
         {
             _isSurfaceValid = false;
+            ReleaseNativeWindowHandle();
             Log.Info("AVALONIA", "Surface Destroyed");
+            SurfaceWindowDestroyed?.Invoke(this, EventArgs.Empty);
+        }
 
+        private void CacheNativeWindowHandle()
+        {
+            ReleaseNativeWindowHandle();
+            if (Holder?.Surface?.Handle is { } handle)
+            {
+                _nativeWindowHandle = AndroidFramebuffer.ANativeWindow_fromSurface(JNIEnv.Handle, handle);
+            }
+        }
+
+        private void ReleaseNativeWindowHandle()
+        {
+            if (_nativeWindowHandle != IntPtr.Zero)
+            {
+                AndroidFramebuffer.ANativeWindow_release(_nativeWindowHandle);
+                _nativeWindowHandle = IntPtr.Zero;
+            }
         }
 
         protected void DoDraw()

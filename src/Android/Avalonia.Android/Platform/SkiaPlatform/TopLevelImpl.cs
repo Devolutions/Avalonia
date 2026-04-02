@@ -43,7 +43,7 @@ namespace Avalonia.Android.Platform.SkiaPlatform
         private readonly Clipboard _clipboard;
         private readonly AndroidLauncher? _launcher;
         private readonly AndroidScreens? _screens;
-        private ViewImpl _view;
+        private IAvaloniaRenderView _view;
         private WindowTransparencyLevel _transparencyLevel;
 
         public TopLevelImpl(AvaloniaView avaloniaView, bool placeOnTop = false)
@@ -53,7 +53,10 @@ namespace Avalonia.Android.Platform.SkiaPlatform
                 throw new ArgumentException("AvaloniaView.Context must not be null");
             }
 
-            _view = new ViewImpl(context, this, placeOnTop);
+            if (AndroidPlatform.Options?.UseTextureView == true)
+                _view = new TextureViewImpl(context, this);
+            else
+                _view = new ViewImpl(context, this, placeOnTop);
             _textInputMethod = new AndroidInputMethod<AvaloniaView>(avaloniaView);
             _keyboardHelper = new AndroidKeyboardEventsHelper<TopLevelImpl>(this);
             _pointerHelper = new AndroidMotionEventsHelper(this);
@@ -79,7 +82,7 @@ namespace Avalonia.Android.Platform.SkiaPlatform
             _systemNavigationManager = new AndroidSystemNavigationManagerImpl(context as IActivityNavigationService);
 
             Surfaces = new object[] { _gl, _framebuffer, _view };
-            Handle = new AndroidViewControlHandle(_view);
+            Handle = new AndroidViewControlHandle(_view.View);
         }
 
         public IInputRoot? InputRoot { get; private set; }
@@ -98,9 +101,9 @@ namespace Avalonia.Android.Platform.SkiaPlatform
 
         public Action<double>? ScalingChanged { get; set; }
 
-        public View View => _view;
+        public View View => _view.View;
 
-        internal InvalidationAwareSurfaceView InternalView => _view;
+        internal IAvaloniaRenderView InternalView => _view;
 
         public double DesktopScaling => RenderScaling;
         public IPlatformHandle Handle { get; }
@@ -112,12 +115,12 @@ namespace Avalonia.Android.Platform.SkiaPlatform
 
         public virtual void Hide()
         {
-            _view.Visibility = ViewStates.Invisible;
+            _view.View.Visibility = ViewStates.Invisible;
         }
 
         public void Invalidate(Rect rect)
         {
-            if (_view.Holder?.Surface?.IsValid == true) _view.Invalidate();
+            _view.View.Invalidate();
         }
 
         public Point PointToClient(PixelPoint point)
@@ -142,7 +145,7 @@ namespace Avalonia.Android.Platform.SkiaPlatform
 
         public virtual void Show()
         {
-            _view.Visibility = ViewStates.Visible;
+            _view.View.Visibility = ViewStates.Visible;
         }
 
         public double RenderScaling { get; }
@@ -224,6 +227,38 @@ namespace Avalonia.Android.Platform.SkiaPlatform
             }
         }
 
+        sealed class TextureViewImpl : InvalidationAwareTextureView
+        {
+            private readonly TopLevelImpl _tl;
+            private Size _oldSize;
+            private double _oldScaling;
+
+            public TextureViewImpl(Context context, TopLevelImpl tl) : base(context)
+            {
+                _tl = tl;
+            }
+
+            public override void OnSurfaceTextureSizeChanged(global::Android.Graphics.SurfaceTexture surfaceTexture, int width, int height)
+            {
+                base.OnSurfaceTextureSizeChanged(surfaceTexture, width, height);
+
+                var newSize = Size.ToSize(Scaling);
+                var newScaling = Scaling;
+
+                if (newSize != _oldSize)
+                {
+                    _oldSize = newSize;
+                    _tl.OnResized(newSize);
+                }
+                // ReSharper disable once CompareOfFloatsByEqualityOperator
+                if (newScaling != _oldScaling)
+                {
+                    _oldScaling = newScaling;
+                    _tl.ScalingChanged?.Invoke(newScaling);
+                }
+            }
+        }
+
         public IPopupImpl? CreatePopup() => null;
 
         public Action? LostFocus { get; set; }
@@ -259,7 +294,7 @@ namespace Avalonia.Android.Platform.SkiaPlatform
 
         public AcrylicPlatformCompensationLevels AcrylicCompensationLevels => new AcrylicPlatformCompensationLevels(1, 1, 1);
 
-        IntPtr EglGlPlatformSurface.IEglWindowGlPlatformSurfaceInfo.Handle => ((IPlatformHandle)_view).Handle;
+        IntPtr EglGlPlatformSurface.IEglWindowGlPlatformSurfaceInfo.Handle => _view.Handle;
         bool EglGlPlatformSurface.IEglWindowGlPlatformSurfaceInfoWithWaitPolicy.SkipWaits => true;
 
         public PixelSize Size => _view.Size;
@@ -272,7 +307,7 @@ namespace Avalonia.Android.Platform.SkiaPlatform
 
         public void SetTransparencyLevelHint(IReadOnlyList<WindowTransparencyLevel> transparencyLevels)
         {
-            if (_view.Context is not AvaloniaMainActivity activity)
+            if (_view.View.Context is not AvaloniaMainActivity activity)
                 return;
 
             foreach (var level in transparencyLevels)

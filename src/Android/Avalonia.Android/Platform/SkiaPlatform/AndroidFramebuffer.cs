@@ -10,11 +10,11 @@ namespace Avalonia.Android.Platform.SkiaPlatform
     {
         private IntPtr _window;
 
-        public AndroidFramebuffer(Surface surface, double scaling)
+        public AndroidFramebuffer(IAvaloniaRenderView surface, double scaling)
         {
             if(surface == null)
                 throw new ArgumentNullException(nameof(surface));
-            _window = ANativeWindow_fromSurface(JNIEnv.Handle, surface.Handle);
+            _window = ((IPlatformHandle)surface).Handle;
             if (_window == IntPtr.Zero)
                 throw new Exception("Unable to obtain ANativeWindow");
             ANativeWindow_Buffer buffer;
@@ -38,7 +38,6 @@ namespace Avalonia.Android.Platform.SkiaPlatform
         public void Dispose()
         {
             ANativeWindow_unlockAndPost(_window);
-            ANativeWindow_release(_window);
             _window = IntPtr.Zero;
             Address = IntPtr.Zero;
         }
