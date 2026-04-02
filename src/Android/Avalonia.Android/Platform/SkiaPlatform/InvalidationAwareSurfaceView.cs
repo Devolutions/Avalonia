@@ -6,11 +6,12 @@ using Android.Runtime;
 using Android.Util;
 using Android.Views;
 using Avalonia.Android.Platform.SkiaPlatform;
+using Avalonia.Logging;
 using Avalonia.Platform;
 
 namespace Avalonia.Android
 {
-    internal abstract class InvalidationAwareSurfaceView : SurfaceView, ISurfaceHolderCallback, INativePlatformHandleSurface
+    internal abstract class InvalidationAwareSurfaceView : SurfaceView, ISurfaceHolderCallback, IAvaloniaRenderView
     {
         bool _invalidateQueued;
         private bool _isDisposed;
@@ -18,7 +19,9 @@ namespace Avalonia.Android
         readonly object _lock = new object();
         private readonly Handler _handler;
 
-        internal event EventHandler? SurfaceWindowCreated;
+        public event EventHandler? SurfaceWindowCreated;
+        
+        View IAvaloniaRenderView.View => this;
 
         IntPtr IPlatformHandle.Handle => _isSurfaceValid && Holder?.Surface?.Handle is { } handle ?
             AndroidFramebuffer.ANativeWindow_fromSurface(JNIEnv.Handle, handle) :

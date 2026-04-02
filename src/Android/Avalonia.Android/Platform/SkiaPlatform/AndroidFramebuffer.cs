@@ -10,7 +10,7 @@ namespace Avalonia.Android.Platform.SkiaPlatform
     {
         private IntPtr _window;
 
-        public AndroidFramebuffer(Surface surface, double scaling)
+        public AndroidFramebuffer(IAvaloniaRenderView surface, double scaling)
         {
             if(surface == null)
                 throw new ArgumentNullException(nameof(surface));

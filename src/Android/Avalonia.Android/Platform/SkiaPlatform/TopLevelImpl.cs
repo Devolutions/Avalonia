@@ -43,7 +43,7 @@ namespace Avalonia.Android.Platform.SkiaPlatform
         private readonly Clipboard _clipboard;
         private readonly AndroidLauncher? _launcher;
         private readonly AndroidScreens? _screens;
-        private ViewImpl _view;
+        private IAvaloniaRenderView _view;
         private WindowTransparencyLevel _transparencyLevel;
 
         public TopLevelImpl(AvaloniaView avaloniaView, bool placeOnTop = false)
@@ -53,7 +53,10 @@ namespace Avalonia.Android.Platform.SkiaPlatform
                 throw new ArgumentException("AvaloniaView.Context must not be null");
             }
 
-            _view = new ViewImpl(context, this, placeOnTop);
+            if (AndroidPlatform.Options?.UseTextureView == true)
+                _view = new TextureViewImpl(context, this);
+            else
+                _view = new ViewImpl(context, this, placeOnTop);
             _textInputMethod = new AndroidInputMethod<AvaloniaView>(avaloniaView);
             _keyboardHelper = new AndroidKeyboardEventsHelper<TopLevelImpl>(this);
             _pointerHelper = new AndroidMotionEventsHelper(this);
@@ -79,7 +82,7 @@ namespace Avalonia.Android.Platform.SkiaPlatform
             _systemNavigationManager = new AndroidSystemNavigationManagerImpl(context as IActivityNavigationService);
 
             Surfaces = new object[] { _gl, _framebuffer, _view };
-            Handle = new AndroidViewControlHandle(_view);
+            Handle = new AndroidViewControlHandle(_view.View);
         }
 
         public IInputRoot? InputRoot { get; private set; }
@@ -98,9 +101,9 @@ namespace Avalonia.Android.Platform.SkiaPlatform
 
         public Action<double>? ScalingChanged { get; set; }
 
-        public View View => _view;
+        public View View => _view.View;
 
-        internal InvalidationAwareSurfaceView InternalView => _view;
+        internal IAvaloniaRenderView InternalView => _view;
 
         public double DesktopScaling => RenderScaling;
         public IPlatformHandle Handle { get; }
@@ -112,12 +115,12 @@ namespace Avalonia.Android.Platform.SkiaPlatform
 
         public virtual void Hide()
         {
-            _view.Visibility = ViewStates.Invisible;
+            _view.View.Visibility = ViewStates.Invisible;
         }
 
         public void Invalidate(Rect rect)
         {
-            if (_view.Holder?.Surface?.IsValid == true) _view.Invalidate();
+            _view.View.Invalidate();
         }
 
         public Point PointToClient(PixelPoint point)
@@ -142,7 +145,7 @@ namespace Avalonia.Android.Platform.SkiaPlatform
 
         public virtual void Show()
         {
-            _view.Visibility = ViewStates.Visible;
+            _view.View.Visibility = ViewStates.Visible;
         }
 
         public double RenderScaling { get; }
@@ -224,6 +227,57 @@ namespace Avalonia.Android.Platform.SkiaPlatform
             }
         }
 
+        sealed class TextureViewImpl : InvalidationAwareTextureView
+        {
+            private readonly TopLevelImpl _tl;
+            private Size _oldSize;
+
+            public TextureViewImpl(Context context, TopLevelImpl tl) : base(context)
+            {
+                _tl = tl;
+            }
+            
+            protected override void Draw()
+            {
+                _tl.Draw();
+            }
+
+            protected override void DispatchDraw(global::Android.Graphics.Canvas canvas)
+            {
+                // Workaround issue #9230 on where screen remains gray after splash screen.
+                // base.DispatchDraw should punch a hole into the canvas so the surface
+                // can be seen below, but it does not.
+                if (OperatingSystem.IsAndroidVersionAtLeast(29))
+                {
+                    // Android 10+ does this (BlendMode was new)
+                    var paint = new Paint();
+                    paint.SetColor(0);
+                    paint.BlendMode = BlendMode.Clear;
+                    canvas.DrawRect(0, 0, Width, Height, paint);
+                }
+                else
+                {
+                    // Android 9 did this
+                    canvas.DrawColor(Color.Transparent, PorterDuff.Mode.Clear!);
+                }
+
+                base.DispatchDraw(canvas);
+            }
+
+            public override void OnSurfaceTextureSizeChanged(global::Android.Graphics.SurfaceTexture surfaceTexture, int width, int height)
+            {
+                var newSize = new PixelSize(width, height).ToSize(_tl.RenderScaling);
+
+                if (newSize != _oldSize)
+                {
+                    _oldSize = newSize;
+                    _tl.OnResized(newSize);
+                }
+
+                base.OnSurfaceTextureSizeChanged(surfaceTexture, width, height);
+            }
+        }
+
         public IPopupImpl? CreatePopup() => null;
 
         public Action? LostFocus { get; set; }
@@ -259,7 +313,7 @@ namespace Avalonia.Android.Platform.SkiaPlatform
 
         public AcrylicPlatformCompensationLevels AcrylicCompensationLevels => new AcrylicPlatformCompensationLevels(1, 1, 1);
 
-        IntPtr EglGlPlatformSurface.IEglWindowGlPlatformSurfaceInfo.Handle => ((IPlatformHandle)_view).Handle;
+        IntPtr EglGlPlatformSurface.IEglWindowGlPlatformSurfaceInfo.Handle => _view.Handle;
         bool EglGlPlatformSurface.IEglWindowGlPlatformSurfaceInfoWithWaitPolicy.SkipWaits => true;
 
         public PixelSize Size => _view.Size;
@@ -272,7 +326,7 @@ namespace Avalonia.Android.Platform.SkiaPlatform
 
         public void SetTransparencyLevelHint(IReadOnlyList<WindowTransparencyLevel> transparencyLevels)
         {
-            if (_view.Context is not AvaloniaMainActivity activity)
+            if (_view.View.Context is not AvaloniaMainActivity activity)
                 return;
 
             foreach (var level in transparencyLevels)
