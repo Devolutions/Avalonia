@@ -239,10 +239,10 @@ namespace Avalonia.Android.Platform.SkiaPlatform
             
             protected override void Draw()
             {
-                _tl.Draw();
+                // _tl.Draw();
             }
 
-            protected override void DispatchDraw(global::Android.Graphics.Canvas canvas)
+            /*protected override void DispatchDraw(global::Android.Graphics.Canvas canvas)
             {
                 // Workaround issue #9230 on where screen remains gray after splash screen.
                 // base.DispatchDraw should punch a hole into the canvas so the surface
@@ -262,7 +262,7 @@ namespace Avalonia.Android.Platform.SkiaPlatform
                 }
 
                 base.DispatchDraw(canvas);
-            }
+            }*/
 
             public override void OnSurfaceTextureSizeChanged(global::Android.Graphics.SurfaceTexture surfaceTexture, int width, int height)
             {
