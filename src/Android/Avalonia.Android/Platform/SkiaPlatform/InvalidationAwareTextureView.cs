@@ -9,7 +9,7 @@ using Avalonia.Platform;
 namespace Avalonia.Android.Platform.SkiaPlatform;
 
 internal abstract class InvalidationAwareTextureView : TextureView, TextureView.ISurfaceTextureListener,
-    IAvaloniaRenderView
+    View.IOnLayoutChangeListener, IAvaloniaRenderView
 {
     private bool _isSurfaceValid;
     private Surface? _surface;
@@ -32,10 +32,12 @@ internal abstract class InvalidationAwareTextureView : TextureView, TextureView.
     {
         SurfaceTextureListener = this;
         SetOpaque(false);
+        AddOnLayoutChangeListener(this);
     }
 
     internal new void Dispose()
     {
+        RemoveOnLayoutChangeListener(this);
         _surface?.Dispose();
         _surface = null;
     }
@@ -67,7 +69,16 @@ internal abstract class InvalidationAwareTextureView : TextureView, TextureView.
 
     public virtual void OnSurfaceTextureUpdated(SurfaceTexture surfaceTexture)
     {
-        // No action needed — called after each frame is drawn to the texture.
+        Invalidate();
+    }
+
+    public void OnLayoutChange(View? v, int left, int top, int right, int bottom,
+        int oldLeft, int oldTop, int oldRight, int oldBottom)
+    {
+        if (!_isSurfaceValid || SurfaceTexture is not { } surfaceTexture)
+            return;
+
+        OnSurfaceTextureSizeChanged(surfaceTexture, right - left, bottom - top);
     }
 
     protected abstract void Draw();

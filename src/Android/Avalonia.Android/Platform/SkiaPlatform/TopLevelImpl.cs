@@ -239,7 +239,7 @@ namespace Avalonia.Android.Platform.SkiaPlatform
             
             protected override void Draw()
             {
-                _tl.Draw();
+                // _tl.Draw();
             }
 
             public override void OnSurfaceTextureSizeChanged(global::Android.Graphics.SurfaceTexture surfaceTexture, int width, int height)
