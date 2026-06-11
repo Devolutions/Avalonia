@@ -161,14 +161,22 @@ namespace Avalonia.Input.GestureRecognizers
             }
             else if(sampleCount > 1)
             {
-                // Return linear velocity if we don't have enough samples
-                var distance = newestSample.Point - oldestSample.Point;
-                return new VelocityEstimate(
-                  PixelsPerSecond: new Vector(distance.X / duration.Milliseconds * 1000, distance.Y / duration.Milliseconds * 1000),
-                  Confidence: 1,
-                  Duration: duration,
-                  Offset: offset
-                );
+                // Return linear velocity if we don't have enough samples for a curve fit.
+                // Use TotalMilliseconds (not the 0-999 Milliseconds component) and guard a zero duration:
+                // a fast flick can produce duplicate/near-zero timestamps, and distance / 0 yields NaN or
+                // Infinity which, once it reaches the scroll Offset, causes an infinite coerce recursion
+                // (see ScrollViewer.CoerceOffset and #21444).
+                var elapsedMs = duration.TotalMilliseconds;
+                if (elapsedMs > 0)
+                {
+                    var distance = newestSample.Point - oldestSample.Point;
+                    return new VelocityEstimate(
+                      PixelsPerSecond: new Vector(distance.X / elapsedMs * 1000, distance.Y / elapsedMs * 1000),
+                      Confidence: 1,
+                      Duration: duration,
+                      Offset: offset
+                    );
+                }
             }
 
             // We're unable to make a velocity estimate but we did have at least one
